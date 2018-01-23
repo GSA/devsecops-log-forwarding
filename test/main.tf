@@ -15,7 +15,7 @@ module "network" {
   enable_dns_hostnames = true
   enable_dns_support = true
   enable_nat_gateway = true
-  name = "devsecops-example-mgmt"
+  name = "devsecops-log-forwarding-test"
   public_subnets = ["${var.public_subnet_cidr}"]
   private_subnets = ["${var.private_subnet_cidr}"]
 }
@@ -43,8 +43,8 @@ module "log_forwarding" {
   source = ".."
 
   vpc_id = "${module.network.vpc_id}"
-  public_subnets = "${module.network.public_subnets}"
-  private_subnets = "${module.network.private_subnets}"
+  # TODO make private
+  lb_subnets = "${module.network.public_subnets}"
+  instance_subnets = "${module.network.private_subnets}"
   ami_id = "${data.aws_ami.ubuntu.id}"
-  azs = ["${local.azs}"]
 }

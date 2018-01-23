@@ -5,8 +5,7 @@ resource "aws_lb" "log_forwarding" {
   # this is actually an NLB
   # https://aws.amazon.com/elasticloadbalancing/details/#compare
   load_balancer_type = "network"
-  # TODO change to private
-  subnets = ["${var.public_subnets}"]
+  subnets = ["${var.lb_subnets}"]
 }
 
 resource "aws_lb_target_group" "log_forwarding" {
