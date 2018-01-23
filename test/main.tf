@@ -17,6 +17,7 @@ module "network" {
   enable_nat_gateway = true
   name = "devsecops-example-mgmt"
   public_subnets = ["${var.public_subnet_cidr}"]
+  private_subnets = ["${var.private_subnet_cidr}"]
 }
 
 data "aws_ami" "ubuntu" {

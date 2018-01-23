@@ -15,7 +15,6 @@ resource "aws_launch_configuration" "log_forwarding" {
 }
 
 resource "aws_autoscaling_group" "log_forwarding" {
-  availability_zones = ["${var.azs}"]
   vpc_zone_identifier = ["${var.private_subnets}"]
   # will likely switch to Launch Template once available
   # https://github.com/terraform-providers/terraform-provider-aws/issues/2505
