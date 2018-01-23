@@ -1,4 +1,4 @@
-resource "aws_alb" "log_forwarding" {
+resource "aws_lb" "log_forwarding" {
   # TODO make internal
   # internal = true
 
@@ -9,19 +9,19 @@ resource "aws_alb" "log_forwarding" {
   subnets = ["${var.public_subnets}"]
 }
 
-resource "aws_alb_target_group" "log_forwarding" {
+resource "aws_lb_target_group" "log_forwarding" {
   vpc_id = "${var.vpc_id}"
   port = "${local.logging_port}"
   protocol = "${local.logging_protocol}"
 }
 
-resource "aws_alb_listener" "log_forwarding" {
-  load_balancer_arn = "${aws_alb.log_forwarding.arn}"
+resource "aws_lb_listener" "log_forwarding" {
+  load_balancer_arn = "${aws_lb.log_forwarding.arn}"
   port = "${local.logging_port}"
   protocol = "${local.logging_protocol}"
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.log_forwarding.arn}"
+    target_group_arn = "${aws_lb_target_group.log_forwarding.arn}"
     type = "forward"
   }
 }

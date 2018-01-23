@@ -25,7 +25,7 @@ resource "aws_autoscaling_group" "log_forwarding" {
   min_size                  = 1
   desired_capacity          = 2
 
-  target_group_arns = ["${aws_alb_target_group.log_forwarding.arn}"]
+  target_group_arns = ["${aws_lb_target_group.log_forwarding.arn}"]
 
   tag {
     key                 = "Component"
