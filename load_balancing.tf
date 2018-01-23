@@ -1,6 +1,8 @@
 resource "aws_alb" "log_forwarding" {
-  # TODO make internal?
+  # TODO make internal
   # internal = true
+
+  # this is actually an NLB
   # https://aws.amazon.com/elasticloadbalancing/details/#compare
   load_balancer_type = "network"
   # TODO change to private

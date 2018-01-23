@@ -7,6 +7,11 @@ resource "aws_launch_configuration" "log_forwarding" {
   name_prefix = "log-forwarding-"
   image_id      = "${var.ami_id}"
   instance_type = "t2.micro"
+
+  # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html#using-with-autoscaling-groups
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_autoscaling_group" "log_forwarding" {
@@ -26,5 +31,10 @@ resource "aws_autoscaling_group" "log_forwarding" {
     key                 = "Component"
     value               = "log-forwarding"
     propagate_at_launch = true
+  }
+
+  # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html#using-with-autoscaling-groups
+  lifecycle {
+    create_before_destroy = true
   }
 }
