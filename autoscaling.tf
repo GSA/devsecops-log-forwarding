@@ -4,7 +4,7 @@ locals {
 }
 
 resource "aws_launch_configuration" "log_forwarding" {
-  name          = "log-forwarding"
+  name_prefix = "log-forwarding-"
   image_id      = "${var.ami_id}"
   instance_type = "t2.micro"
 }
