@@ -1,3 +1,11 @@
+data "aws_region" "current" {
+  current = true
+}
+
+locals {
+  azs = ["${data.aws_region.current.name}${var.az}"]
+}
+
 module "network" {
   source = "terraform-aws-modules/vpc/aws"
   version = ">= 1.11.0"
@@ -32,4 +40,10 @@ data "aws_ami" "ubuntu" {
 
 module "log_forwarding" {
   source = ".."
+
+  vpc_id = "${module.network.vpc_id}"
+  public_subnets = "${module.network.public_subnets}"
+  private_subnets = "${module.network.private_subnets}"
+  ami_id = "${data.aws_ami.ubuntu.id}"
+  azs = ["${local.azs}"]
 }

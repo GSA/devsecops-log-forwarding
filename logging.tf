@@ -5,13 +5,13 @@ locals {
 
 resource "aws_launch_configuration" "log_forwarding" {
   name          = "log-forwarding"
-  image_id      = "${data.aws_ami.ubuntu.id}"
+  image_id      = "${var.ami_id}"
   instance_type = "t2.micro"
 }
 
 resource "aws_autoscaling_group" "log_forwarding" {
-  availability_zones = ["${local.azs}"]
-  vpc_zone_identifier = ["${module.network.private_subnets}"]
+  availability_zones = ["${var.azs}"]
+  vpc_zone_identifier = ["${var.private_subnets}"]
   # will likely switch to Launch Template once available
   # https://github.com/terraform-providers/terraform-provider-aws/issues/2505
   launch_configuration      = "${aws_launch_configuration.log_forwarding.name}"
@@ -35,11 +35,11 @@ resource "aws_alb" "log_forwarding" {
   # https://aws.amazon.com/elasticloadbalancing/details/#compare
   load_balancer_type = "network"
   # TODO change to private
-  subnets = ["${module.network.public_subnets}"]
+  subnets = ["${var.public_subnets}"]
 }
 
 resource "aws_alb_target_group" "log_forwarding" {
-  vpc_id = "${module.network.vpc_id}"
+  vpc_id = "${var.vpc_id}"
   port = "${local.logging_port}"
   protocol = "${local.logging_protocol}"
 }
