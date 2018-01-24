@@ -36,6 +36,7 @@ resource "aws_launch_configuration" "log_forwarding" {
   instance_type = "t2.micro"
   security_groups = ["${aws_security_group.public.id}"]
   key_name = "${var.key_pair}"
+  user_data = "${file("${path.module}/files/setup.sh")}"
 
   # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html#using-with-autoscaling-groups
   lifecycle {

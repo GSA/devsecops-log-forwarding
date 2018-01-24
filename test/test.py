@@ -4,6 +4,7 @@ import subprocess
 import unittest
 import warnings
 
+
 class TestLogForwarding(unittest.TestCase):
 
     def can_connect_to_port(self, host, port):
@@ -19,7 +20,7 @@ class TestLogForwarding(unittest.TestCase):
         result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return result.stdout.decode('utf-8').strip()
 
-    def test_ssh_to_test_instance(self):
+    def get_instances(self):
         # workaround for https://github.com/boto/boto3/issues/454
         warnings.simplefilter('ignore', ResourceWarning)
 
@@ -29,10 +30,22 @@ class TestLogForwarding(unittest.TestCase):
                 {'Name': 'instance-state-name', 'Values': ['running']},
                 {'Name': 'vpc-id', 'Values': [vpc_id]}
         ])
+        self.assertGreaterEqual(len(list(instances)), 1)
+        return instances
 
-        self.assertEqual(len(list(instances)), 1)
+    def test_ssh_listening(self):
+        instances = self.get_instances()
         for instance in instances:
             self.assertTrue(self.can_connect_to_port(instance.public_ip_address, 22))
+
+    def test_syslog_listening(self):
+        instances = self.get_instances()
+        for instance in instances:
+            self.assertTrue(self.can_connect_to_port(instance.public_ip_address, 514))
+
+    def test_syslog_through_lb(self):
+        logging_host = self.get_terraform_output('logging_host')
+        self.assertTrue(self.can_connect_to_port(logging_host, 514))
 
 
 if __name__ == '__main__':
