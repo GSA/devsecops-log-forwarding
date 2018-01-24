@@ -13,3 +13,11 @@ variable "instance_subnets" {
 variable "ami_id" {
   type = "string"
 }
+
+variable "key_pair" {
+  type = "string"
+}
+
+variable "ssh_cidr" {
+  default = "0.0.0.0/0"
+}

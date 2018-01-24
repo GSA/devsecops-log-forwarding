@@ -39,12 +39,19 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+resource "aws_key_pair" "deployer" {
+  key_name_prefix = "log-forwarding-deployer-key-"
+  public_key = "${file("~/.ssh/id_rsa.pub")}"
+}
+
 module "log_forwarding" {
   source = ".."
 
   vpc_id = "${module.network.vpc_id}"
   # TODO make private
   lb_subnets = "${module.network.public_subnets}"
-  instance_subnets = "${module.network.private_subnets}"
+  instance_subnets = "${module.network.public_subnets}"
   ami_id = "${data.aws_ami.ubuntu.id}"
+  key_pair = "${aws_key_pair.deployer.key_name}"
+  ssh_cidr = "${var.ssh_cidr}"
 }

@@ -3,10 +3,39 @@ locals {
   logging_protocol = "TCP"
 }
 
+resource "aws_security_group" "public" {
+  vpc_id = "${var.vpc_id}"
+
+  ingress {
+    from_port = "${local.logging_port}"
+    to_port = "${local.logging_port}"
+    protocol = "${local.logging_protocol}"
+    # TODO change to VPC CIDR
+    cidr_blocks = ["${var.ssh_cidr}"]
+  }
+  # SSH
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["${var.ssh_cidr}"]
+  }
+
+  egress {
+    # allow all
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_launch_configuration" "log_forwarding" {
   name_prefix = "log-forwarding-"
   image_id      = "${var.ami_id}"
   instance_type = "t2.micro"
+  security_groups = ["${aws_security_group.public.id}"]
+  key_name = "${var.key_pair}"
 
   # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html#using-with-autoscaling-groups
   lifecycle {
@@ -26,7 +55,8 @@ resource "aws_autoscaling_group" "log_forwarding" {
 
   max_size                  = 3
   min_size                  = 1
-  desired_capacity          = 2
+  # TODO increase
+  desired_capacity          = 1
 
   target_group_arns = ["${aws_lb_target_group.log_forwarding.arn}"]
 
