@@ -10,13 +10,13 @@ resource "aws_lb" "log_forwarding" {
 
 resource "aws_lb_target_group" "log_forwarding" {
   vpc_id = "${var.vpc_id}"
-  port = "${local.logging_port}"
+  port = "${var.logging_port}"
   protocol = "${local.logging_protocol}"
 }
 
 resource "aws_lb_listener" "log_forwarding" {
   load_balancer_arn = "${aws_lb.log_forwarding.arn}"
-  port = "${local.logging_port}"
+  port = "${var.logging_port}"
   protocol = "${local.logging_protocol}"
 
   default_action {

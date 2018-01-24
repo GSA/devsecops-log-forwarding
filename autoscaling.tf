@@ -1,5 +1,4 @@
 locals {
-  logging_port = 514
   logging_protocol = "TCP"
 }
 
@@ -7,8 +6,8 @@ resource "aws_security_group" "public" {
   vpc_id = "${var.vpc_id}"
 
   ingress {
-    from_port = "${local.logging_port}"
-    to_port = "${local.logging_port}"
+    from_port = "${var.logging_port}"
+    to_port = "${var.logging_port}"
     protocol = "${local.logging_protocol}"
     # TODO change to VPC CIDR
     cidr_blocks = ["${var.ssh_cidr}"]
@@ -30,12 +29,21 @@ resource "aws_security_group" "public" {
   }
 }
 
+data "template_file" "setup" {
+  template = "${file("${path.module}/templates/setup.sh")}"
+  vars {
+    input_port = "${var.logging_port}"
+    input_protocol = "${lower(local.logging_protocol)}"
+  }
+}
+
 resource "aws_launch_configuration" "log_forwarding" {
   name_prefix = "log-forwarding-"
   image_id      = "${var.ami_id}"
   instance_type = "t2.micro"
   security_groups = ["${aws_security_group.public.id}"]
   key_name = "${var.key_pair}"
+  user_data = "${data.template_file.setup.rendered}"
 
   # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html#using-with-autoscaling-groups
   lifecycle {

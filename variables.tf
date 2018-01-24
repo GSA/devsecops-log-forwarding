@@ -21,3 +21,8 @@ variable "key_pair" {
 variable "ssh_cidr" {
   default = "0.0.0.0/0"
 }
+
+variable "logging_port" {
+  default = 601
+  description = "Incoming log port. Uses the default for syslog over TCP, as defined by IANA RFC3195. https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=syslog"
+}
