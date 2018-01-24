@@ -63,21 +63,26 @@ class TestLogForwarding(unittest.TestCase):
         finally:
             ssh.close()
 
-    def received_syslog(self, host, ssh_user, msg):
-        found = False
+    @contextmanager
+    def fluentd_log(self, host, ssh_user):
         with self.ssh_client(host, ssh_user) as ssh:
             # https://stackoverflow.com/a/1597750/358804
             sftp = ssh.open_sftp()
-            remote_file = sftp.open('/var/log/td-agent/td-agent.log')
             try:
-                for line in remote_file:
-                    if msg in line:
-                        found = True
-                        break
+                remote_file = sftp.open('/var/log/td-agent/td-agent.log')
+                try:
+                    yield remote_file
+                finally:
+                    remote_file.close()
             finally:
-                remote_file.close()
                 sftp.close()
-        return found
+
+    def received_syslog(self, host, ssh_user, msg):
+        with self.fluentd_log(host, ssh_user) as f:
+            for line in f:
+                if msg in line:
+                    return True
+        return False
 
     def test_ssh_listening(self):
         instances = self.get_instances()
