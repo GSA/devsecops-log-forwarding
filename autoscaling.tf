@@ -30,13 +30,20 @@ resource "aws_security_group" "public" {
   }
 }
 
+data "template_file" "setup" {
+  template = "${file("${path.module}/templates/setup.sh")}"
+  vars {
+    incoming_port = "${local.logging_port}"
+  }
+}
+
 resource "aws_launch_configuration" "log_forwarding" {
   name_prefix = "log-forwarding-"
   image_id      = "${var.ami_id}"
   instance_type = "t2.micro"
   security_groups = ["${aws_security_group.public.id}"]
   key_name = "${var.key_pair}"
-  user_data = "${file("${path.module}/files/setup.sh")}"
+  user_data = "${data.template_file.setup.rendered}"
 
   # https://www.terraform.io/docs/providers/aws/r/launch_configuration.html#using-with-autoscaling-groups
   lifecycle {

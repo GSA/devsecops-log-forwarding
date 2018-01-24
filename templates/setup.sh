@@ -7,7 +7,7 @@ curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-xenial-td-agent3.sh 
 sudo sh -c 'echo "
 <source>
   @type syslog
-  port 514
+  port ${incoming_port}
   bind 0.0.0.0
   protocol_type tcp
   tag external
