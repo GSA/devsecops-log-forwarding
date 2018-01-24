@@ -1,4 +1,5 @@
 import boto3
+from contextlib import contextmanager
 import logging
 from logging import handlers
 import paramiko
@@ -40,6 +41,44 @@ class TestLogForwarding(unittest.TestCase):
     def get_logging_port(self):
         return int(self.get_terraform_output('logging_port'))
 
+    def send_syslog(self, host, port, msg):
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
+        # use TCP; requires Python 3.2+
+        handler = handlers.SysLogHandler(address=(host, port), socktype=socket.SOCK_STREAM)
+        logger.addHandler(handler)
+
+        # include the current time so that it doesn't get mistaken for previous test runs
+        msg = "test message from Python unittest, at {0}".format(int(time.time()))
+        logger.info(msg)
+
+    @contextmanager
+    def ssh_client(self, host, ssh_user):
+        ssh = paramiko.SSHClient()
+        # https://stackoverflow.com/a/17732926/358804
+        ssh.load_system_host_keys()
+        ssh.connect(host, username=ssh_user, look_for_keys=False)
+        try:
+            yield ssh
+        finally:
+            ssh.close()
+
+    def received_syslog(self, host, ssh_user, msg):
+        found = False
+        with self.ssh_client(host, ssh_user) as ssh:
+            # https://stackoverflow.com/a/1597750/358804
+            sftp = ssh.open_sftp()
+            remote_file = sftp.open('/var/log/td-agent/td-agent.log')
+            try:
+                for line in remote_file:
+                    if msg in line:
+                        found = True
+                        break
+            finally:
+                remote_file.close()
+                sftp.close()
+        return found
+
     def test_ssh_listening(self):
         instances = self.get_instances()
         for instance in instances:
@@ -60,34 +99,17 @@ class TestLogForwarding(unittest.TestCase):
         logging_host = self.get_terraform_output('logging_host')
         logging_port = self.get_logging_port()
 
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        # use TCP; requires Python 3.2+
-        handler = handlers.SysLogHandler(address=(logging_host, logging_port), socktype=socket.SOCK_STREAM)
-        logger.addHandler(handler)
-
         # include the current time so that it doesn't get mistaken for previous test runs
         msg = "test message from Python unittest, at {0}".format(int(time.time()))
-        logger.info(msg)
+        self.send_syslog(logging_host, logging_port, msg)
 
+        # could have gone to any of the fluentd instances, so check all of them
         instances = self.get_instances()
         found = False
         for instance in instances:
-            ssh = paramiko.SSHClient()
-            ssh.load_system_host_keys()
-            # https://stackoverflow.com/a/17732926/358804
-            ssh.connect(instance.public_ip_address, username='ubuntu', look_for_keys=False)
-            # https://stackoverflow.com/a/1597750/358804
-            sftp = ssh.open_sftp()
-            remote_file = sftp.open('/var/log/td-agent/td-agent.log')
-            try:
-                for line in remote_file:
-                    if msg in line:
-                        found = True
-                        break
-            finally:
-                remote_file.close()
-                ssh.close()
+            if self.received_syslog(instance.public_ip_address, 'ubuntu', msg):
+                found = True
+                break
 
         self.assertTrue(found)
 
