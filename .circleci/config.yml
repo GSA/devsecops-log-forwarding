@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: hashicorp/terraform:light
+    environment:
+      # arbitrary value
+      AWS_DEFAULT_REGION: us-east-1
+    steps:
+      - checkout
+      - run:
+          name: Create dummy SSH key
+          command: |
+            mkdir -p ~/.ssh
+            touch ~/.ssh/id_rsa.pub
+      - run:
+          name: Set up Terraform
+          command: terraform init -backend=false test
+      - run:
+          name: Validate Terraform
+          command: terraform validate test
