@@ -32,7 +32,8 @@ resource "aws_security_group" "public" {
 data "template_file" "setup" {
   template = "${file("${path.module}/templates/setup.sh")}"
   vars {
-    incoming_port = "${var.logging_port}"
+    input_port = "${var.logging_port}"
+    input_protocol = "${lower(local.logging_protocol)}"
   }
 }
 
