@@ -33,6 +33,9 @@ class TestLogForwarding(unittest.TestCase):
         self.assertGreaterEqual(len(list(instances)), 1)
         return instances
 
+    def get_logging_port(self):
+        return int(self.get_terraform_output('logging_port'))
+
     def test_ssh_listening(self):
         instances = self.get_instances()
         for instance in instances:
@@ -40,12 +43,14 @@ class TestLogForwarding(unittest.TestCase):
 
     def test_syslog_listening(self):
         instances = self.get_instances()
+        logging_port = self.get_logging_port()
         for instance in instances:
-            self.assertTrue(self.can_connect_to_port(instance.public_ip_address, 514))
+            self.assertTrue(self.can_connect_to_port(instance.public_ip_address, logging_port))
 
     def test_syslog_through_lb(self):
         logging_host = self.get_terraform_output('logging_host')
-        self.assertTrue(self.can_connect_to_port(logging_host, 514))
+        logging_port = self.get_logging_port()
+        self.assertTrue(self.can_connect_to_port(logging_host, logging_port))
 
 
 if __name__ == '__main__':

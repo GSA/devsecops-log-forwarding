@@ -1,5 +1,4 @@
 locals {
-  logging_port = 514
   logging_protocol = "TCP"
 }
 
@@ -7,8 +6,8 @@ resource "aws_security_group" "public" {
   vpc_id = "${var.vpc_id}"
 
   ingress {
-    from_port = "${local.logging_port}"
-    to_port = "${local.logging_port}"
+    from_port = "${var.logging_port}"
+    to_port = "${var.logging_port}"
     protocol = "${local.logging_protocol}"
     # TODO change to VPC CIDR
     cidr_blocks = ["${var.ssh_cidr}"]
@@ -33,7 +32,7 @@ resource "aws_security_group" "public" {
 data "template_file" "setup" {
   template = "${file("${path.module}/templates/setup.sh")}"
   vars {
-    incoming_port = "${local.logging_port}"
+    incoming_port = "${var.logging_port}"
   }
 }
 

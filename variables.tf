@@ -21,3 +21,8 @@ variable "key_pair" {
 variable "ssh_cidr" {
   default = "0.0.0.0/0"
 }
+
+variable "logging_port" {
+  default = 514
+  description = "Incoming log port"
+}
