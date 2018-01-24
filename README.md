@@ -9,3 +9,31 @@ This is a [Terraform](https://www.terraform.io/) module that creates infrastruct
 This is needed at [GSA](https://www.gsa.gov/) because we need logs to be forwarded to our security team for compliance and incident response reasons, as well as whatever logging system the team is using. It can be tricky to configure multiple logging endpoints for syslog agents on every instance; this way, changes to the forwarding can be done in one place.
 
 For the "tenant's logging system", we recommend [our EKK stack](https://github.com/GSA/devsecops-ekk-stack).
+
+## Development
+
+1. Install dependencies.
+    * Python 3.2+
+    * [Pipenv](https://docs.pipenv.org/#install-pipenv-today)
+    * Terraform
+1. From the root of the repository, install Python dependencies.
+
+    ```sh
+    pipenv install
+    pipenv shell
+    ```
+
+1. [Configure AWS credentials.](https://www.terraform.io/docs/providers/aws/#authentication)
+1. Set up test infrastructure.
+
+    ```sh
+    cd tests
+    terraform init
+    terraform apply
+    ```
+
+1. Run tests.
+
+    ```sh
+    python3 test.py
+    ```
