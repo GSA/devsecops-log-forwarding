@@ -23,11 +23,18 @@ For the "tenant's logging system", we recommend [our EKK stack](https://github.c
     pipenv shell
     ```
 
+Note that in some cases, you may have to force pipenv to use python 3.6:
+
+    ```sh
+    pipenv --python 3.6 install
+    pipenv --python 3.6 shell
+    ```
+
 1. [Configure AWS credentials.](https://www.terraform.io/docs/providers/aws/#authentication)
 1. Set up test infrastructure.
 
     ```sh
-    cd tests
+    cd test
     terraform init
     terraform apply
     ```
