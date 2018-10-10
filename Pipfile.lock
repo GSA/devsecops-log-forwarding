@@ -164,7 +164,7 @@
                 "sha256:33e36775a6c71790ba7692a73f948b329cf9295a72b0102144b031114bd2a4f3"
             ],
             "index": "pypi",
-            "version": "==2.4.1"
+            "version": "~>2.4.2"
         },
         "pyasn1": {
             "hashes": [
